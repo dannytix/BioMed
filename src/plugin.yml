@@ -1,0 +1,38 @@
+name: BioMed
+version: 0.1
+description: Control biome behavior!
+load: startup
+author: Karl Marx
+#Thanks to Nightgunner5 for the original Biome plugin!
+main: me.karlmarx.biomed.BioMedPlugin
+softdepend: [WorldEdit]
+commands:
+    biome:
+        description: Control biome behavior for a region or the whole map.
+        aliases: biomed
+        usage: Syntax error! See the BioMed page on bukkit.org for usage.
+permissions:
+    biomed.*:
+        description: Allows full access to all BioMed commands.
+        children:
+            biomed.set: true
+            biomed.clear: true
+            biomed.get: true
+            biomed.list: true
+            biomed.setglobal: true
+    biomed.set:
+        description: Add new biome regions
+        default: op
+    biomed.clear:
+        description: Remove existing biome regions
+        default: op
+    biomed.get:
+        description: Display the biome of a single block or whole world.
+        default: true
+    biomed.list:
+        description: Display supported biomes.
+        default: true
+    biomed.setglobal:
+        description: Change the biome of an entire map.
+        default: op
+        

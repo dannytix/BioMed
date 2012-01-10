@@ -1,0 +1,5 @@
+#Configuration file for BioMed
+
+options:
+    allowglobal: true
+    allowop: true
