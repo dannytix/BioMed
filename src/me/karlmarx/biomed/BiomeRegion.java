@@ -3,7 +3,6 @@ package me.karlmarx.biomed;
 import java.io.Serializable;
 
 import org.bukkit.block.Biome;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import com.sk89q.worldedit.regions.Region;
 

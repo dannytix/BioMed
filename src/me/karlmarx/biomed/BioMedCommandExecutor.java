@@ -179,7 +179,7 @@ public class BioMedCommandExecutor implements CommandExecutor {
 						+ sb.charAt(0)
 						+ sb.substring(1).toLowerCase().replace('_', ' '));
 			} catch (IllegalArgumentException ex) {
-				sender.sendMessage("Unknown biome.");
+				sender.sendMessage("Unknown/unsupported biome.");
 			} catch (Exception ex) {
 				sender.sendMessage("You have not defined a selection in WorldEdit.");
 				ex.printStackTrace();
