@@ -188,7 +188,11 @@ public class BioMedPlugin extends JavaPlugin{
 			return 0;
 		}
     	
-		List<Map<String, Object>> regionList = getConfig().getMapList("worlds." + world.getName() + ".regions");
+		List<Map<String, Object>> regionList = null;
+		try{
+			regionList = getConfig().getMapList("worlds." + world.getName() + ".regions");
+		}
+		catch(Exception e){ } //worlds.<world>.regions does not exist: continue.
 		if(regionList != null){
 			int x1 = x & (~(int)0xF);
 			int z1 = z & (~(int)0xF);
