@@ -7,11 +7,9 @@ import net.minecraft.server.BiomeCache;
 import net.minecraft.server.BiomeCacheBlock;
 import net.minecraft.server.ChunkCoordIntPair;
 import net.minecraft.server.ChunkPosition;
-import net.minecraft.server.LongHashMap;
 import net.minecraft.server.World;
 import net.minecraft.server.WorldChunkManager;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +17,6 @@ import java.util.Map;
 
 public class BioMedChunkManager extends WorldChunkManager implements BioMedManager{
 
-	private final World world;
 	public final WorldChunkManager inner;
 	private Map<Long, BiomeBase[]> biomeData;
 	private BiomeCache biomeCache;
@@ -31,8 +28,7 @@ public class BioMedChunkManager extends WorldChunkManager implements BioMedManag
 	}
 	
     public BioMedChunkManager(World world){
-    	this.world = world;
-    	this.inner = world.worldProvider.b;
+    	this.inner = world.worldProvider.c;
     	biomeData = new HashMap<Long, BiomeBase[]>();
     	biomeCache = new BiomeCache(this);
     	globalBiome = null;
@@ -51,7 +47,7 @@ public class BioMedChunkManager extends WorldChunkManager implements BioMedManag
      * get biome of a single block
      * status - done, no changes needed
      */
-    public BiomeBase a(ChunkCoordIntPair chunkcoordintpair){
+    public BiomeBase getBiome(ChunkCoordIntPair chunkcoordintpair){
         return this.getBiome(chunkcoordintpair.x << 4, chunkcoordintpair.z << 4);
     }
 
@@ -261,7 +257,7 @@ public class BioMedChunkManager extends WorldChunkManager implements BioMedManag
      * Get biomes of a region from cache
      * status - done, no changes needed
      */
-    public BiomeBase[] a(BiomeBase[] biomes, int x, int z, int lx, int lz){
+    public BiomeBase[] getBiomeBlock(BiomeBase[] biomes, int x, int z, int lx, int lz){
         return this.a(biomes, x, z, lx, lz, true);
     }
 
@@ -281,7 +277,8 @@ public class BioMedChunkManager extends WorldChunkManager implements BioMedManag
      * status - done
      * TODO patch in modified data?
      */
-    public boolean a(int i, int j, int k, List list) {
+    @SuppressWarnings("rawtypes")
+	public boolean a(int i, int j, int k, List list) {
         return inner.a(i, j, k, list);
     }
 
@@ -290,7 +287,8 @@ public class BioMedChunkManager extends WorldChunkManager implements BioMedManag
      * status - done
      * TODO patch in modified data?
      */
-    public ChunkPosition a(int i, int j, int k, List list, Random random) {
+    @SuppressWarnings("rawtypes")
+	public ChunkPosition a(int i, int j, int k, List list, Random random) {
         return inner.a(i, j, k, list, random);
     }
 

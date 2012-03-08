@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.minecraft.server.BiomeBase;
@@ -14,12 +13,10 @@ import net.minecraft.server.WorldChunkManagerHell;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.event.Event;
 import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.event.world.WorldListener;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class BioMedPlugin extends JavaPlugin{
@@ -93,7 +90,7 @@ public class BioMedPlugin extends JavaPlugin{
 			return;
 		}
 		
-		world.getHandle().worldProvider.b = (WorldChunkManager)manager;
+		world.getHandle().worldProvider.c = (WorldChunkManager)manager;
 		List<Map<String, Object>> worldRegions = null;
 		try{
 			worldRegions = worldConfig.getMapList("regions");
@@ -126,13 +123,13 @@ public class BioMedPlugin extends JavaPlugin{
 	public void restoreWorld(CraftWorld world){
 		switch(world.getEnvironment()){
 		case NORMAL:
-			world.getHandle().worldProvider.b = ((BioMedChunkManager)world.getHandle().worldProvider.b).inner;
+			world.getHandle().worldProvider.c = ((BioMedChunkManager)world.getHandle().worldProvider.c).inner;
 			break;
 		case NETHER:
-			world.getHandle().worldProvider.b = new WorldChunkManagerHell(BiomeBase.HELL, 1.0F, 0.0F);
+			world.getHandle().worldProvider.c = new WorldChunkManagerHell(BiomeBase.HELL, 1.0F, 0.0F);
 			break;
 		case THE_END:
-			world.getHandle().worldProvider.b = new WorldChunkManagerHell(BiomeBase.SKY, 0.5F, 0.0F);
+			world.getHandle().worldProvider.c = new WorldChunkManagerHell(BiomeBase.SKY, 0.5F, 0.0F);
 			break;
 		default:
 			log.warning("[BioMed] Unrecognized world environment: " + world.getEnvironment());
@@ -140,16 +137,19 @@ public class BioMedPlugin extends JavaPlugin{
 		}
 	}
 	
-	public boolean addRegionToWorld(CraftWorld world, int x, int z, int lx, int lz, Biome biome){
+	public boolean addRegionToWorld(CraftWorld world, int x, int z, int lx, int lz, Biome biome) throws IllegalArgumentException{
 		BioMedManager manager = null;
 		try{
-			manager = (BioMedManager)world.getHandle().worldProvider.b;
+			manager = (BioMedManager)world.getHandle().worldProvider.c;
 		}
 		catch(Exception e){
 			log.warning("[BioMed] Trying to add region to unsupported world: " + world.getName());
 			return false;
 		}
 		
+		BiomeBase biomeBase = biomeToBiomeBase(biome);
+		if(biomeBase == null)
+			throw new IllegalArgumentException("Unsupported Biome");
 		manager.insertBiomeRegion(x, z, lx, lz, biomeToBiomeBase(biome));
 		
 		List<Map<String, Object>> regionList;
@@ -181,14 +181,18 @@ public class BioMedPlugin extends JavaPlugin{
 		BioMedManager manager = null;
 		int cleared = 0;
 		try{
-			manager = (BioMedManager)world.getHandle().worldProvider.b;
+			manager = (BioMedManager)world.getHandle().worldProvider.c;
 		}
 		catch(Exception e){
 			log.warning("[BioMed] Trying to remove region from unsupported world: " + world.getName());
 			return 0;
 		}
     	
-		List<Map<String, Object>> regionList = getConfig().getMapList("worlds." + world.getName() + ".regions");
+		List<Map<String, Object>> regionList = null;
+		try{
+			regionList = getConfig().getMapList("worlds." + world.getName() + ".regions");
+		}
+		catch(Exception e){ } //worlds.<world>.regions does not exist: continue.
 		if(regionList != null){
 			int x1 = x & (~(int)0xF);
 			int z1 = z & (~(int)0xF);
@@ -247,9 +251,9 @@ public class BioMedPlugin extends JavaPlugin{
 		
 		String global;
 		try{
-			BioMedManager manager = (BioMedManager) world.getHandle().worldProvider.b;
+			BioMedManager manager = (BioMedManager) world.getHandle().worldProvider.c;
 			BiomeBase biome = manager.globalBiome();
-			global = biome.r;
+			global = biome.w;
 		}
 		catch(Exception e){
 			global = "not set";
@@ -264,7 +268,7 @@ public class BioMedPlugin extends JavaPlugin{
 		
 		BioMedManager manager;
 		try{
-			manager = (BioMedManager) world.getHandle().worldProvider.b;
+			manager = (BioMedManager) world.getHandle().worldProvider.c;
 		}
 		catch(Exception e){
 			log.warning("[BioMed] Trying to change global biome in unsupported world: " + world.getName());
@@ -317,6 +321,16 @@ public class BioMedPlugin extends JavaPlugin{
 			return BiomeBase.MUSHROOM_ISLAND;
 		case MUSHROOM_SHORE:
 			return BiomeBase.MUSHROOM_SHORE;
+		case BEACH:
+			return BiomeBase.BEACH;
+		case DESERT_HILLS:
+			return BiomeBase.DESERT_HILLS;
+		case FOREST_HILLS:
+			return BiomeBase.FOREST_HILLS;
+		case TAIGA_HILLS:
+			return BiomeBase.TAIGA_HILLS;
+		case SMALL_MOUNTAINS:
+			return BiomeBase.SMALL_MOUNTAINS;
 		default:
 			return null;
 		}

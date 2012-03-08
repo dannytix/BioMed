@@ -153,7 +153,7 @@ public class BioMedChunkManagerHell extends WorldChunkManagerHell implements Bio
     		Arrays.fill(biomes, globalBiome);
     	}
     	else
-    		biomes = super.a(biomes, x, z, lx, lz);
+    		biomes = super.getBiomes(biomes, x, z, lx, lz);
     	
     	for(int j = 0; j < (z2 - z1 + 1); j += 16)
     		for(int i = 0; i < (x2 - x1 + 1); i += 16){
@@ -182,7 +182,7 @@ public class BioMedChunkManagerHell extends WorldChunkManagerHell implements Bio
      * Get biomes of a region from cache
      * status - done, no changes needed
      */
-    public BiomeBase[] a(BiomeBase[] biomes, int x, int z, int lx, int lz){
+    public BiomeBase[] getBiomeBlock(BiomeBase[] biomes, int x, int z, int lx, int lz){
         return getBiomes(biomes, x, z, lx, lz);
     }
 
