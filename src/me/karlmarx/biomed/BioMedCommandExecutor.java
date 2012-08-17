@@ -5,7 +5,6 @@ import org.bukkit.block.Biome;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -13,7 +12,7 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.regions.Region;
 
 public class BioMedCommandExecutor implements CommandExecutor {
-	private BioMedPlugin plugin;
+	private final BioMedPlugin plugin;
 	
 	
 	public BioMedCommandExecutor(BioMedPlugin plugin){
@@ -59,7 +58,7 @@ public class BioMedCommandExecutor implements CommandExecutor {
 			}
 			
 			int x, z;
-			CraftWorld world;
+			World world;
 			
 			if(player == null || args.length >= 4){
 				try{
@@ -73,7 +72,7 @@ public class BioMedCommandExecutor implements CommandExecutor {
 				}
 			}
 			else{
-				world = (CraftWorld) player.getWorld();
+				world = player.getWorld();
 				x = player.getLocation().getBlockX();
 				z = player.getLocation().getBlockZ();
 			}
@@ -91,7 +90,7 @@ public class BioMedCommandExecutor implements CommandExecutor {
 			}
 			
 			int x, z, lx, lz;
-			CraftWorld world;
+			World world;
 			StringBuilder sb;
 			
 			if(player == null || args.length >= 7){
@@ -117,7 +116,7 @@ public class BioMedCommandExecutor implements CommandExecutor {
 				return false;
 			}
 			else{
-				world = (CraftWorld) player.getWorld();
+				world = player.getWorld();
 				x = player.getLocation().getBlockX() & ~(int)0xF;
 				z = player.getLocation().getBlockZ() & ~(int)0xF;
 				lx = 16;
@@ -129,7 +128,7 @@ public class BioMedCommandExecutor implements CommandExecutor {
 
 			try {
 				Biome biome = Biome.valueOf(sb.toString());
-				plugin.addRegionToWorld(world, x, z, lx, lz, biome);
+				BioMedUtils.setBiomes(x, z, lx, lz, world, biome);
 				sender.sendMessage("Set your chunk's biome to "
 						+ sb.charAt(0)
 						+ sb.substring(1).toLowerCase().replace('_', ' '));
@@ -169,12 +168,13 @@ public class BioMedCommandExecutor implements CommandExecutor {
 					return true;
 				}
 				Region region = we.getSelection(player).getRegionSelector().getRegion();
+				World world = player.getWorld();
 				Biome biome = Biome.valueOf(sb.toString());
 				int x = region.getMinimumPoint().getBlockX();
 				int z = region.getMinimumPoint().getBlockZ();
 				int lx = region.getMaximumPoint().getBlockX() - x + 1;
 				int lz = region.getMaximumPoint().getBlockZ() - z + 1;
-				plugin.addRegionToWorld((CraftWorld)player.getWorld(), x, z, lx, lz, biome);
+				BioMedUtils.setBiomes(x, z, lx, lz, world, biome);
 				sender.sendMessage("Set your selection's biome to "
 						+ sb.charAt(0)
 						+ sb.substring(1).toLowerCase().replace('_', ' '));
@@ -193,7 +193,7 @@ public class BioMedCommandExecutor implements CommandExecutor {
 			}
 			
 			int x, z, lx, lz;
-			CraftWorld world;
+			World world;
 			
 			if(player == null || args.length == 6){
 				try{
@@ -210,16 +210,16 @@ public class BioMedCommandExecutor implements CommandExecutor {
 				}
 			}
 			else{
-				world = (CraftWorld) player.getWorld();
-				x = player.getLocation().getBlockX();
-				z = player.getLocation().getBlockZ();
-				lx = 1;
-				lz = 1;
+				world = player.getWorld();
+				x = player.getLocation().getBlockX() & ~(int)0xF;
+				z = player.getLocation().getBlockZ() & ~(int)0xF;
+				lx = 16;
+				lz = 16;
 			}
 
 			try {
-				int cleared = plugin.clearRegionFromWorld(world, x, z, lx, lz);
-				sender.sendMessage("Cleared " + cleared + " regions!");
+				BioMedUtils.clearBiomes(x, z, lx, lz, world);
+				sender.sendMessage("Biome data restored.");
 			} catch (Exception ex) {
 				sender.sendMessage("An unknown error has occurred.\n"
 						+ "Check your server log for more details.");
@@ -250,11 +250,12 @@ public class BioMedCommandExecutor implements CommandExecutor {
 				int z = region.getMinimumPoint().getBlockZ();
 				int lx = region.getMaximumPoint().getBlockX() - x + 1;
 				int lz = region.getMaximumPoint().getBlockZ() - z + 1;
-				int cleared = plugin.clearRegionFromWorld((CraftWorld)player.getWorld(), x, z, lx, lz);
-				sender.sendMessage("Cleared " + cleared + " regions!");
+				World world = player.getWorld();
+				BioMedUtils.clearBiomes(x, z, lx, lz, world);
+				sender.sendMessage("Biome data restored.");
 			} catch (Exception ex) {
 				sender.sendMessage("You have not defined a selection in WorldEdit.");
-				//ex.printStackTrace();
+				ex.printStackTrace();
 			}
 			return true;
 		}
@@ -264,21 +265,25 @@ public class BioMedCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			
-			CraftWorld world;
+			String world;
 			
 			if(player == null || args.length > 1){
 				if(args.length == 1)
 					return false;
-				world = getWorldByName(args[1]);
-				if(world == null){
-					sender.sendMessage("Unrecognized world: " + args[1]);
-					return true;
-				}
+				world = args[1];
 			}
 			else
-				world = (CraftWorld) player.getWorld();
+				world = player.getWorld().getName();
 			
-			String globalName = plugin.getGlobal(world);
+			GlobalBlockPopulator pop = plugin.globalBiomes.get(world);
+			Biome globalBiome = null;
+			if(pop != null)
+				globalBiome = pop.getBiome();
+			String globalName;
+			if(globalBiome == null)
+				globalName = "not set.";
+			else
+				globalName = globalBiome.toString();
 			sender.sendMessage("The global biome is " + globalName);
 			
 			return true;
@@ -289,7 +294,7 @@ public class BioMedCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			
-			CraftWorld world;
+			World world;
 			int bStart = 1;
 			
 			if(args.length < 2)
@@ -311,7 +316,7 @@ public class BioMedCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			else
-				world = (CraftWorld) player.getWorld();
+				world = player.getWorld();
 			
 			StringBuilder sb = new StringBuilder(args[bStart].toUpperCase());
 			for (int i = bStart + 1; i < args.length; i++) {
@@ -331,10 +336,20 @@ public class BioMedCommandExecutor implements CommandExecutor {
 				}
 			}
 			
-			plugin.setGlobal(world, biome);
+			GlobalBlockPopulator pop = plugin.globalBiomes.get(world.getName());
+			if(pop == null){
+				pop = new GlobalBlockPopulator();
+				world.getPopulators().add(pop);
+				plugin.globalBiomes.put(world.getName(), pop);
+			}
+			pop.setBiome(biome);
 			sender.sendMessage("Changed the global biome to "
 					+ sb.charAt(0)
 					+ sb.substring(1).toLowerCase().replace('_', ' '));
+			if(biome != null){
+				sender.sendMessage("Updating all loaded chunks...");
+				BioMedUtils.setAllLoadedBiomes(world, biome);
+			}
 			
 			return true;
 		}
@@ -342,10 +357,10 @@ public class BioMedCommandExecutor implements CommandExecutor {
 		return false;
 	}
 	
-	private CraftWorld getWorldByName(String name){
+	private World getWorldByName(String name){
 		for(World world : plugin.getServer().getWorlds()){
 			if(world.getName().equalsIgnoreCase(name))
-				return (CraftWorld) world;
+				return world;
 		}
 		return null;
 	}
@@ -358,4 +373,5 @@ public class BioMedCommandExecutor implements CommandExecutor {
 		else
 			return null;
 	}
+
 }

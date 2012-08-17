@@ -1,6 +1,6 @@
 name: BioMed
-version: 0.2
-description: Control biome behavior!
+version: 0.5
+description: Fix your biomes!
 load: startup
 author: Karl Marx
 #Thanks to Nightgunner5 for the original Biome plugin!
