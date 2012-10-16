@@ -129,7 +129,7 @@ public class BioMedCommandExecutor implements CommandExecutor {
 			try {
 				Biome biome = Biome.valueOf(sb.toString());
 				BioMedUtils.setBiomes(x, z, lx, lz, world, biome);
-				sender.sendMessage("Set your chunk's biome to "
+				sender.sendMessage("Biome set to "
 						+ sb.charAt(0)
 						+ sb.substring(1).toLowerCase().replace('_', ' '));
 			} catch (IllegalArgumentException ex) {

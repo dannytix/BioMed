@@ -66,10 +66,10 @@ public class BioMedPlugin extends JavaPlugin implements Listener{
 		Biome globalBiome;
 		try{
 			String gName = worldConfig.getString("global");
-			if(gName.equals("none"))
+			if(gName.equalsIgnoreCase("none"))
 				globalBiome = null;
 			else
-				globalBiome = Biome.valueOf(gName);
+				globalBiome = Biome.valueOf(gName.toUpperCase());
 		}
 		catch(Exception e){//unsupported global biome in config
 			log.warning("[BioMed] Unrecognized global biome for world \"" + world.getName() + "\"");
