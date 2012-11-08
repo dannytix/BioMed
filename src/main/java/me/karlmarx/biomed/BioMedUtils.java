@@ -151,7 +151,7 @@ public final class BioMedUtils {
 	}
 	
 	protected static BiomeBase[] getDefaultBiomeBases(int x, int z, int lx, int lz, World world) {
-		return ((CraftWorld)world).getHandle().worldProvider.c.getBiomes(null, x, z, lx, lz);
+		return ((CraftWorld)world).getHandle().worldProvider.d.getBiomes(null, x, z, lx, lz);
 	}
 
 }

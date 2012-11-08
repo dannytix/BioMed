@@ -142,47 +142,42 @@ public class BioMedCommandExecutor implements CommandExecutor {
 			}
 			return true;
 		}
-		else if("set-selection".equals(args[0])){
-			if(!(sender.hasPermission("biomed.set") || (plugin.allowOp && sender.isOp()))){
+		else if("set-selection".equals(args[0])) {
+			if(!(sender.hasPermission("biomed.set") || (plugin.allowOp && sender.isOp())))
 				sender.sendMessage("You do not have permission to run this command.");
-				return true;
-			}
-			
-			if(player == null){
+			else if (!WETools.isAvailable(plugin.getServer())) {
+				sender.sendMessage("This server does not have the WorldEdit plugin installed.");
+				sender.sendMessage("Use \"" + label + " set\" instead.");
+			} else if(player == null)
 				sender.sendMessage("This command only available to players.");
-				return true;
-			}
-			if(args.length < 2)
+			else if(args.length < 2)
 				return false;
-
-			StringBuilder sb = new StringBuilder(args[1].toUpperCase());
-			for (int i = 2; i < args.length; i++) {
-				sb.append('_').append(args[i].toUpperCase());
-			}
-
-			try {
-				WorldEditPlugin we = getWorldEdit();
-				if (we == null) {
-					sender.sendMessage("This server does not have the WorldEdit plugin installed.");
-					sender.sendMessage("Use \"" + label + " set\" instead.");
+			else {
+				StringBuilder sb = new StringBuilder(args[1].toUpperCase());
+				for (int i = 2; i < args.length; i++) {
+					sb.append('_').append(args[i].toUpperCase());
+				}
+				Biome biome;
+				try {
+					biome = Biome.valueOf(sb.toString());
+				} catch(IllegalArgumentException e) {
+					sender.sendMessage("Unknown/unsupported biome.");
 					return true;
 				}
-				Region region = we.getSelection(player).getRegionSelector().getRegion();
+				Selection selection = WETools.getSelection(player);
+				if(selection.isEmpty()) {
+					sender.sendMessage("You have not defined a WorldEdit region.");
+					return true;
+				}
+				int x = selection.x;
+				int z = selection.z;
+				int lx = selection.lx;
+				int lz = selection.lz;
 				World world = player.getWorld();
-				Biome biome = Biome.valueOf(sb.toString());
-				int x = region.getMinimumPoint().getBlockX();
-				int z = region.getMinimumPoint().getBlockZ();
-				int lx = region.getMaximumPoint().getBlockX() - x + 1;
-				int lz = region.getMaximumPoint().getBlockZ() - z + 1;
 				BioMedUtils.setBiomes(x, z, lx, lz, world, biome);
 				sender.sendMessage("Set your selection's biome to "
 						+ sb.charAt(0)
 						+ sb.substring(1).toLowerCase().replace('_', ' '));
-			} catch (IllegalArgumentException ex) {
-				sender.sendMessage("Unknown/unsupported biome.");
-			} catch (Exception ex) {
-				sender.sendMessage("You have not defined a selection in WorldEdit.");
-				ex.printStackTrace();
 			}
 			return true;
 		}
@@ -227,35 +222,22 @@ public class BioMedCommandExecutor implements CommandExecutor {
 			}
 			return true;
 		}
-		else if("clear-selection".equals(args[0])){
-			if(!(sender.hasPermission("biomed.clear") || (plugin.allowOp && sender.isOp()))){
+		else if("clear-selection".equals(args[0])) {
+			if(!(sender.hasPermission("biomed.clear") || (plugin.allowOp && sender.isOp())))
 				sender.sendMessage("You do not have permission to run this command.");
-				return true;
-			}
-			
-			if(player == null){
+			else if(player == null)
 				sender.sendMessage("This command only available to players.");
-				return true;
-			}
-
-			try {
-				WorldEditPlugin we = getWorldEdit();
-				if (we == null) {
-					sender.sendMessage("This server does not have the WorldEdit plugin installed.\n"
-							+ "Use \"" + label + " clear\" instead.");
-					return false;
+			else if(!WETools.isAvailable(plugin.getServer())) {
+				sender.sendMessage("This server does not have the WorldEdit plugin installed.");
+				sender.sendMessage("Use \"" + label + " set\" instead.");
+			} else {
+				Selection slct = WETools.getSelection(player);
+				if(slct.isEmpty())
+					sender.sendMessage("You have not defined a WorldEdit region.");
+				else {
+					BioMedUtils.clearBiomes(slct.x, slct.z, slct.lx, slct.lz, player.getWorld());
+					sender.sendMessage("Biome data restored.");
 				}
-				Region region = we.getSelection(player).getRegionSelector().getRegion();
-				int x = region.getMinimumPoint().getBlockX();
-				int z = region.getMinimumPoint().getBlockZ();
-				int lx = region.getMaximumPoint().getBlockX() - x + 1;
-				int lz = region.getMaximumPoint().getBlockZ() - z + 1;
-				World world = player.getWorld();
-				BioMedUtils.clearBiomes(x, z, lx, lz, world);
-				sender.sendMessage("Biome data restored.");
-			} catch (Exception ex) {
-				sender.sendMessage("You have not defined a selection in WorldEdit.");
-				ex.printStackTrace();
 			}
 			return true;
 		}
@@ -363,15 +345,6 @@ public class BioMedCommandExecutor implements CommandExecutor {
 				return world;
 		}
 		return null;
-	}
-	
-	private WorldEditPlugin getWorldEdit() {
-		Plugin worldEdit = plugin.getServer().getPluginManager().getPlugin("WorldEdit");
-
-		if (worldEdit != null && worldEdit instanceof WorldEditPlugin)
-			return (WorldEditPlugin) worldEdit;
-		else
-			return null;
 	}
 
 }
