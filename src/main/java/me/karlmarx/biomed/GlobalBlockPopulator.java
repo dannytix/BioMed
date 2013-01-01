@@ -2,12 +2,12 @@ package me.karlmarx.biomed;
 
 import java.util.Random;
 
-import net.minecraft.server.BiomeBase;
+import net.minecraft.server.v1_4_6.BiomeBase;
 
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
-import org.bukkit.craftbukkit.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_4_6.block.CraftBlock;
 import org.bukkit.generator.BlockPopulator;
 
 public class GlobalBlockPopulator extends BlockPopulator {
