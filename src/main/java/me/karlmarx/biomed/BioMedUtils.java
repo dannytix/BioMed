@@ -2,14 +2,14 @@ package me.karlmarx.biomed;
 
 import java.util.Arrays;
 
-import net.minecraft.server.BiomeBase;
+import net.minecraft.server.v1_4_6.BiomeBase;
 
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
-import org.bukkit.craftbukkit.CraftChunk;
-import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_4_6.CraftChunk;
+import org.bukkit.craftbukkit.v1_4_6.CraftWorld;
+import org.bukkit.craftbukkit.v1_4_6.block.CraftBlock;
 
 public final class BioMedUtils {
 	
